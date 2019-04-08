@@ -66,4 +66,97 @@ class StreamIntegrationTest extends TestCase
         $this->tearDown();
     }
 
+    /**
+     * @link @link https://dev.twitch.tv/docs/api/webhooks-guide/#subscriptions
+     * @link https://dev.twitch.tv/docs/api/reference/#get-webhook-subscriptions
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#topic-stream-changed
+     */
+    public function testRegisterStreamWebHookSubscriptions(){
+        $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
+        $token = 'xxxyxxxyx';
+        $userId = 23161357;
+        $streamCallbackUri = $this->buildUrlString('api/pubsub');
+
+        $mock->shouldReceive('getWebhooksSubscriptionApi->subscribeToStream')
+             ->withArgs([$userId, $token, $streamCallbackUri]);
+        $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
+
+        $this->call('POST', 'api/stream/subscribe/'. $userId, [], [], [], [
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
+
+        $this->assertResponseOk();
+
+        $this->tearDown();
+
+    }
+
+
+    /**
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#subscribe-tounsubscribe-from-events
+     * @link https://dev.twitch.tv/docs/api/webhooks-guide/#getting-notifications
+     */
+    public function testPublishStreamChanged(){
+        $mock = Mockery::spy(\Pusher\Pusher::class);
+
+        $sampleStreamResponse = [
+            'data'       => json_decode(json_encode([
+                'id'            => '26007494656',
+                'user_id'       => '23161357',
+                'user_name'     => 'LIRIK',
+                'game_id'       => '417752',
+                'community_ids' => [],
+                'type'          => 'live',
+                'title'         => 'Best Stream Ever',
+                'viewer_count'  => 32575,
+                'started_at'    => '2017-08-14T16:08:32Z',
+                'language'      => 'en',
+                'thumbnail_url' => 'https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-{width}x{height}.jpg',
+
+            ]))
+        ];
+        $username = 'LIRIK';
+        $event = 'stream_changed';
+        $token = 'xxxxyxxx';
+        $data = [
+            'message'   => sprintf('%s viewers', 32575),
+            'thumbnail' => strtr('https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-{width}x{height}.jpg', ['{width}' => 40, '{height}' => 40]),
+            'userId'    => '23161357',
+            'title'     => sprintf('%s: %s [%s]', 'LIRIK', 'Best Stream Ever', 'live'),
+        ];
+
+        $mock->shouldReceive('trigger')
+             ->withArgs([$username, $event, $data]);
+        $this->app->instance(\Pusher\Pusher::class, $mock);
+
+        $this->call('POST', 'api/pubsub', $sampleStreamResponse , [], [], [
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
+
+        $this->assertResponseOk();
+
+        $this->tearDown();
+
+    }
+
+
+    /**
+     * validates response from twitcher webhook.
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#subscribe-tounsubscribe-from-events
+     */
+    public function testVerifyStreamSubscription(){
+
+
+        $token = 'xxxxyyxxx';
+        $hubChallenge = 'myHubIKnow';
+
+        $this->call('GET', 'api/pubsub?hub_challenge='.$hubChallenge, [] , [], [], [
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
+
+        $this->assertEquals($hubChallenge, $this->response->getContent());
+
+
+    }
+
 }

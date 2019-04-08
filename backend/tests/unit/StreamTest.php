@@ -72,27 +72,4 @@ class StreamTest extends TestCase
         $this->tearDown();
     }
 
-
-    /**
-     * @link @link https://dev.twitch.tv/docs/api/webhooks-guide/#subscriptions
-     * @link https://dev.twitch.tv/docs/api/reference/#get-webhook-subscriptions
-     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#topic-stream-changed
-     */
-    public function testRegisterStreamWebHookSubscriptions(){
-        $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
-        $token = 'xxxyxxxyx';
-        $userId = 23161357;
-        $streamCallbackUri = $this->buildUrlString('api/pubsub');
-
-        $mock->shouldReceive('getWebhooksSubscriptionApi->subscribeToStream')
-             ->withArgs([$userId, $token, $streamCallbackUri]);
-        $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
-
-        $this->call('POST', 'api/stream/subscribe/'. $userId, [], [], [], [
-            "HTTP_Authorization" => 'Bearer '. $token
-        ]);
-
-        $this->assertResponseOk();
-
-    }
 }

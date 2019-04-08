@@ -39,4 +39,14 @@ class StreamController extends Controller
 
     }
 
+    final public function pubsub(Request $request)
+    {
+        if (true === $request->isMethod('post')){
+            return  $this->twitchRepository->publishStreamChanged($request);
+        }
+
+        return $this->twitchRepository->validateSubscription($request);
+
+    }
+
 }

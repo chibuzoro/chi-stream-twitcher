@@ -7,8 +7,10 @@
  */
 namespace App\Repository;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use NewTwitchApi\NewTwitchApi;
+use Pusher\Pusher;
 
 class TwitchRepository
 {
@@ -25,15 +27,21 @@ class TwitchRepository
     /**@var string * */
     protected $callBackStreamUri;
 
+    /**
+     * @var Pusher|Null
+     */
+    private $pusher;
+
 
     private const  SCOPES = 'user:edit+viewing_activity_read+openid+channel:read:subscriptions+bits:read+channel_subscriptions+channel_read';
 
 
 
 
-    public function __construct(NewTwitchApi $twitchApi, string $redirectUri, string $callBackStreamUri)
+    public function __construct(NewTwitchApi $twitchApi, Pusher $pusher, string $redirectUri, string $callBackStreamUri)
     {
         $this->twitchApi = $twitchApi;
+        $this->pusher = $pusher;
         $this->redirectUri = $redirectUri;
         $this->callBackStreamUri = $callBackStreamUri;
 
@@ -130,6 +138,63 @@ class TwitchRepository
     final protected function getUserStream(string $username)
     {
         return $this->twitchApi->getStreamsApi()->getStreamForUsername($username)->getBody()->getContents();
+    }
+
+    /**
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#subscribe-tounsubscribe-from-events
+     * @link https://dev.twitch.tv/docs/api/webhooks-guide/#getting-notifications
+     * @param Request $request
+     *
+     * @return int
+     */
+    final public function publishStreamChanged(Request $request) :int
+    {
+
+        $status = 202;
+        Log::debug('checking if webhook has Data: ' . $request->has('data'));
+
+        if (true === $request->has('data')) {
+            $event = $request->input('data');
+
+            $userId = $event->user_id;
+
+
+            $data = [
+                'message'   => sprintf('%s viewers', $event->viewer_count),
+                'thumbnail' => strtr($event->thumbnail_url, ['{width}' => 40, '{height}' => 40]),
+                'userId'    => $event->user_id,
+                'title'     => sprintf('%s: %s [%s]', $event->user_name, $event->title, $event->type),
+            ];
+
+
+            try{
+                Log::debug('Trigger Stream Changed for user: ' . $userId);
+                $this->pusher->trigger($event->user_name, 'stream_changed', $data);
+            }catch (PusherException $exception){
+                Log::critical('failed to push event to pusher api');
+            }
+
+
+        }
+
+        return $status;
+    }
+
+    /**
+     * validates response from twitcher webhook.
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#subscribe-tounsubscribe-from-events
+     *
+     * @param Request $request
+     *
+     * @return string
+     */
+    final public function validateSubscription(Request $request): ?string
+    {
+        Log::debug('validating challenge: ' .  $request->input('hub_challenge'));
+        $challenge = $request->input('hub_challenge');
+        Log::debug('hub challenge received: ' . $challenge);
+        return $challenge;
+
     }
 
 

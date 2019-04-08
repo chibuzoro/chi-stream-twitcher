@@ -13,6 +13,7 @@ use App\Repository\TwitchRepository;
 use Illuminate\Support\ServiceProvider;
 use NewTwitchApi\HelixGuzzleClient;
 use NewTwitchApi\NewTwitchApi;
+use Pusher\Pusher;
 
 
 class TwitchServiceProvider extends ServiceProvider
@@ -41,12 +42,27 @@ class TwitchServiceProvider extends ServiceProvider
 
         });
 
+        // register the twitch api helper class
+        $this->app->singleton(Pusher::class, static function($app){
+            return new Pusher(
+                env('PUSHER_KEY'),
+                env('PUSHER_SECRET'),
+                env('PUSHER_APP_ID'),
+                [
+                    'cluster' => env('PUSHER_CLUSTER'),
+                    'useTLS' => true
+                ]
+            );
+
+        });
+
         // register the twitch repository
         $this->app->singleton(TwitchRepository::class, function($app){
             $redirectUri =  $this->buildUrlString(env('TWITCH_API_REGISTERED_REDIRECT_URL'));
             $callBackStreamUri = $this->buildUrlString('api/pubsub');
             return new TwitchRepository(
                 $app->make( NewTwitchApi::class),
+                $app->make( Pusher::class),
                 $redirectUri,
                 $callBackStreamUri
 
