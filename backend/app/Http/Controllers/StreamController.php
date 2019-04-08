@@ -26,6 +26,7 @@ class StreamController extends Controller
         } catch (InvalidArgumentException $e) {
             return response()->json(['message' => 'Invalid Channel'], 400);
         }
+
         return response()->json($streamData);
     }
 

@@ -36,14 +36,12 @@ class StreamTest extends TestCase
                     'thumbnail_url' => 'https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-{width}x{height}.jpg',
 
                 ],
-                'tag_ids' => [
-                    '6ea6bca4-4712-4ab9-a906-e3336a9d8039',
-                ],
             ],
             'pagination' => [
                 'cursor' => 'eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MjB9fQ==',
             ],
         ]);
+
         $tokenResponse = new \GuzzleHttp\Psr7\Response(200, [],
             $sampleStreamResponse);
 
@@ -55,19 +53,19 @@ class StreamTest extends TestCase
         $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
 
         $streamController = new \App\Http\Controllers\StreamController($this->app->make(\App\Repository\TwitchRepository::class));
-        $streamController->captureStream($username);
+        $response = $streamController->captureStream($username);
 
         $expectedResult[] = [
             'message'   => sprintf('%s viewers', 32575),
             'thumbnail' => strtr('https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-{width}x{height}.jpg', ['{width}' => 40, '{height}' => 40]),
-            'userId'    => 23161357,
+            'userId'    => '23161357',
             'title'     => sprintf('%s: %s [%s]',
                 'LIRIK',
                 'Hey Guys, It\'s Monday - Twitter: @Lirik',
                 'live'),
         ];
 
-        $this->shouldReturnJson(\GuzzleHttp\json_decode($expectedResult));
+        $this->assertEquals(json_encode($expectedResult), $response->getContent() );
 
         // clear the mock
         $this->tearDown();

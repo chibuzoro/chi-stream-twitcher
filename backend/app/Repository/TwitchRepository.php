@@ -7,6 +7,7 @@
  */
 namespace App\Repository;
 
+use Illuminate\Support\Facades\Log;
 use NewTwitchApi\NewTwitchApi;
 
 class TwitchRepository
@@ -114,6 +115,18 @@ class TwitchRepository
         Log::debug('Registering via webhook with callback uri: ' . $this->callBackStreamUri);
         $this->twitchApi->getWebhooksSubscriptionApi()->subscribeToStream($userId, $token, $this->callBackStreamUri);
     }
+
+    /**
+     * @param string $username
+     *
+     * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    final protected function getUserStream(string $username)
+    {
+        return $this->twitchApi->getStreamsApi()->getStreamForUsername($username)->getBody()->getContents();
+    }
+
 
 
 }
