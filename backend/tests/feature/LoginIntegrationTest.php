@@ -28,4 +28,38 @@ class LoginIntegrationTest extends TestCase
         $this->assertResponseStatus(200);
         $this->seeJsonEquals(['authUrl' => $authUrl]);
     }
+
+
+    /**
+     * test accessToken url is returned
+     */
+    public function testGetAccessToken(){
+
+        $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
+
+        $code = 'xwsoponpmuadw6aclommctso6t36ei';
+        $expectedTokenApiResponse = "{
+  \"access_token\": \"0123456789abcdefghijABCDEFGHIJ\",
+  \"refresh_token\": \"eyJfaWQmNzMtNGCJ9%6VFV5LNrZFUj8oU231/3Aj\",
+  \"expires_in\": 3600,
+  \"scope\": [\"viewing_activity_read\"],
+  \"token_type\": \"bearer\"
+}";
+
+        $tokenResponse = new \GuzzleHttp\Psr7\Response(200, [], $expectedTokenApiResponse);
+
+        $redirectUri = $this->buildUrlString(env('TWITCH_API_REGISTERED_REDIRECT_URL'));
+        $mock->shouldReceive('getOauthApi->getUserAccessToken')
+             ->withArgs([$code, $redirectUri])
+             ->andReturn($tokenResponse);
+        $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
+
+        $this->get('/api/auth/token?code=' . $code);
+
+        $this->assertResponseStatus(200);
+        $this->shouldReturnJson(json_decode($expectedTokenApiResponse, true));
+    }
+
+
+
 }

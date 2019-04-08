@@ -48,15 +48,39 @@
     data: () => ({
 
     }),
+    mounted: function(){
+
+      // expects returned code from authcode request.
+      if (this.$route.query && this.$route.query.code){
+        this.getAccessToken(this.$route.query);
+      }
+
+    },
     methods:{
       loginToTwitch: function () {
         let url = apiUrl + '/auth';
         axios.get(url).then(({data})=>{
-          // redirect to twitcher api
+          // redirect to twitcher api to authenticate and receive authcode
           window.location.href = data.authUrl;
         }).catch(({response}) =>{
           console.log(response);
         });
+      },
+      getAccessToken: function (query) {
+        let url = apiUrl + '/auth/token?' + this.convertObjToQueryParam(query);
+        axios.get(url).then(({data})=>{
+          // redirect to twitcher api
+          localStorage.setItem('access',JSON.stringify(data));
+          // store token in axios session so its sent with every request
+          axios.defaults.headers.common['Authorization'] = 'Bearer ' +  data.access_token;
+          this.$router.push('stream')
+
+        }).catch(({response}) =>{
+          console.log(response);
+        });
+      },
+      convertObjToQueryParam: function(obj){
+        return Object.keys(obj).map(key => key + '=' + encodeURIComponent(obj[key])).join('&')
       }
     }
   }

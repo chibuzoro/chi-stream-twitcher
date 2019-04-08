@@ -17,7 +17,7 @@ class TwitchRepository
      */
     private $twitchApi;
 
-    /**@var string * */
+    /**@var string **/
     protected $redirectUri;
 
 
@@ -48,5 +48,19 @@ class TwitchRepository
         );
     }
 
+
+    /**
+     * converts activation code into access tokens
+     * @link https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#oauth-authorization-code-flow
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    final public function getAccessToken($authCode)
+    {
+
+        return $this->twitchApi->getOauthApi()->getUserAccessToken(
+            $authCode,
+            $this->redirectUri
+        );
+    }
 
 }
