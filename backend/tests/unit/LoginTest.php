@@ -24,23 +24,22 @@ class LoginTest extends TestCase
      */
     public function testGetCodeUrl(){
 
-        $twitchApi = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
+        $twitchRepo = \Illuminate\Support\Facades\App::make(\App\Repository\TwitchRepository::class);
 
-        $twitchRepo = new \App\Repository\TwitchRepository($twitchApi);
 
         $scope = 'user:edit+viewing_activity_read+openid+channel:read:subscriptions+bits:read+channel_subscriptions+channel_read';
 
         $loginController = new \App\Http\Controllers\LoginController($twitchRepo);
 
         $authUrl = sprintf('https://id.twitch.tv/oauth2/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=%s',
-            env('TWITCH_API_CLIENT_ID'),
-           $this->buildUrlString( env('TWITCH_API_REGISTERED_REDIRECT_URL')),
+            env('TWITCH_API_CLIENT_ID'), $this->buildUrlString( env('TWITCH_API_REGISTERED_REDIRECT_URL')),
             $scope);
 
         $this->assertEquals(
-            $authUrl, $loginController->getAuthCodeUrl()
+            $authUrl, $loginController->getAuthCodeUrl()['authUrl']
         );
 
     }
+
 
 }

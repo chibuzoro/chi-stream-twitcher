@@ -10,10 +10,12 @@ namespace App\Providers;
 
 
 use App\Repository\TwitchRepository;
+use Illuminate\Support\ServiceProvider;
+use NewTwitchApi\HelixGuzzleClient;
 use NewTwitchApi\NewTwitchApi;
 
 
-class TwitchServiceProvider
+class TwitchServiceProvider extends ServiceProvider
 {
     /**
      * Register any twitcher services.
@@ -41,11 +43,23 @@ class TwitchServiceProvider
 
         // register the twitch repository
         $this->app->singleton(TwitchRepository::class, function($app){
+            $redirectUri =  $this->buildUrlString(env('TWITCH_API_REGISTERED_REDIRECT_URL'));
             return new TwitchRepository(
-                $app->make( NewTwitchApi::class)
+                $app->make( NewTwitchApi::class),
+                $redirectUri
             );
 
         });
+
+
+    }
+
+    private function buildUrlString(string $path) : string{
+        return  sprintf(
+            env('URL_PATTERN'),
+            url('/', [], env('APP_ENV') === 'production'),
+            $path
+        );
     }
 
 }

@@ -17,10 +17,36 @@ class TwitchRepository
      */
     private $twitchApi;
 
-    public function __construct(NewTwitchApi $twitchApi)
+    /**@var string * */
+    protected $redirectUri;
+
+
+    private const  SCOPES = 'user:edit+viewing_activity_read+openid+channel:read:subscriptions+bits:read+channel_subscriptions+channel_read';
+
+
+
+
+    public function __construct(NewTwitchApi $twitchApi, string $redirectUri)
     {
         $this->twitchApi = $twitchApi;
+        $this->redirectUri = $redirectUri;
 
     }
+
+
+    /**
+     * Gets ouath2  authorization url for Activation Code workflow
+     * @return string
+     */
+    final public function getAuthCodeUrl(): string
+    {
+        return $this->twitchApi->getOauthApi()->getAuthUrl(
+            $this->redirectUri,
+            'code',
+            self::SCOPES,
+            false
+        );
+    }
+
 
 }
