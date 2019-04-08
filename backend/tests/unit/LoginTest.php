@@ -9,13 +9,7 @@
 class LoginTest extends TestCase
 {
 
-    private function buildUrlString(string $path) : string{
-        return  sprintf(
-            env('URL_PATTERN'),
-            url('/', [], env('APP_ENV') === 'production'),
-            $path
-        );
-    }
+  use TestTrait;
 
 
     /**
