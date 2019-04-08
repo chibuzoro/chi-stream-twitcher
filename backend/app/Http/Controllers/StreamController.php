@@ -32,6 +32,8 @@ class StreamController extends Controller
 
     final public function registerWebHookSubscriptions(Request $request, $userId){
 
+        return response()->json('OK');
+
     }
 
 }
