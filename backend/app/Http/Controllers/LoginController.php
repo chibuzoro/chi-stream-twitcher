@@ -36,4 +36,11 @@ class LoginController extends Controller
 
     }
 
+    final public function respondToClient(Request $request){
+        // capture returned query and send the code back to client
+        $query =  http_build_query(['code' => $request->get('code')]);
+        $to = env('FRONT_END_DOMAIN') . '/#/?' . $query;
+        return redirect($to);
+    }
+
 }

@@ -14,5 +14,6 @@
 $router->group([ 'prefix' =>'api'], function($router){
     $router->get('/auth', 'LoginController'.'@getAuthCodeUrl');
     $router->get('/auth/token', 'LoginController'.'@getAccessToken');
+    $router->get('/auth/response', 'LoginController'.'@respondToClient');
 });
 
