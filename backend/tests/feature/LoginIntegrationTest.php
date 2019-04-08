@@ -61,6 +61,9 @@ class LoginIntegrationTest extends TestCase
 
         $this->assertResponseStatus(200);
         $this->shouldReturnJson(json_decode($expectedTokenApiResponse, true));
+
+        // clear the mock
+        $this->tearDown();
     }
 
 
