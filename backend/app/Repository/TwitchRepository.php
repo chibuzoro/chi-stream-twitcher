@@ -62,4 +62,58 @@ class TwitchRepository
         );
     }
 
+
+    /**
+     * @link https://dev.twitch.tv/docs/api/reference/#get-streams
+     * @param string $channel
+     * @param string $token
+     *
+     * @return array
+     */
+    final public function captureStream(string $channel): array
+    {
+        try {
+            $userStream = $this->getUserStream($channel);
+        } catch (GuzzleException $exception) {
+            Log::alert("Unable to get user stream: $channel. Please check the service is available and request is valid",
+                ['apiResponse' => $exception->getMessage()]);
+            throw new InvalidArgumentException('Bad Request!', 400);
+        }
+
+        $userData = json_decode($userStream);
+        $data = [];
+        if (true === !empty($userData->data)) {
+            $events = array_slice($userData->data, 0, 10); //retrieve 10 latest events
+            $eventClone = $events;
+
+            $userId = array_shift($eventClone)->user_id;
+
+            Log::debug('Capture Stream Found user with id: ' . $userId);
+
+            foreach ($events as $event) {
+                $data[] = [
+                    'message'   => sprintf('%s viewers', $event->viewer_count),
+                    'thumbnail' => strtr($event->thumbnail_url, ['{width}' => 40, '{height}' => 40]),
+                    'userId'    => $event->user_id,
+                    'title'     => sprintf('%s: %s [%s]', $event->user_name, $event->title, $event->type),
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @link https://dev.twitch.tv/docs/api/webhooks-guide/#subscriptions
+     *
+     * @param string $userId
+     * @param string $token
+     */
+    public function registerWebhook(string $userId, string $token): void
+    {
+        Log::debug('Registering via webhook with callback uri: ' . $this->callBackStreamUri);
+        $this->twitchApi->getWebhooksSubscriptionApi()->subscribeToStream($userId, $token, $this->callBackStreamUri);
+    }
+
+
 }
