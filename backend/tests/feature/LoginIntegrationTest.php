@@ -31,6 +31,20 @@ class LoginIntegrationTest extends TestCase
 
 
     /**
+     * test redirect back to client
+     */
+    public function testRespondToClient(){
+
+        $code = 'xwsoponpmuadw6aclommctso6t36ei';
+
+        $this->get('/api/auth/response?code=' . $code);
+        $this->seeStatusCode(302);
+        $redirectUrl = sprintf('%s/#/?code=%s',env('FRONT_END_DOMAIN'),$code);
+        $this->seeHeader('Location',$redirectUrl);
+
+    }
+
+    /**
      * test accessToken url is returned
      */
     public function testGetAccessToken(){
@@ -65,7 +79,5 @@ class LoginIntegrationTest extends TestCase
         // clear the mock
         $this->tearDown();
     }
-
-
 
 }
