@@ -8,6 +8,7 @@
 
 class StreamTest extends TestCase
 {
+    use TestTrait;
 
     /**
      * @link https://dev.twitch.tv/docs/api/reference/#get-streams
@@ -69,5 +70,28 @@ class StreamTest extends TestCase
 
         // clear the mock
         $this->tearDown();
+    }
+
+
+    /**
+     * @link @link https://dev.twitch.tv/docs/api/webhooks-guide/#subscriptions
+     * @link https://dev.twitch.tv/docs/api/reference/#get-webhook-subscriptions
+     * @link https://dev.twitch.tv/docs/api/webhooks-reference/#topic-stream-changed
+     */
+    public function testRegisterStreamWebHookSubscriptions(){
+        $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
+        $token = 'xxxyxxxyx';
+        $userId = 23161357;
+        $streamCallbackUri = $this->buildUrlString('api/pubsub');
+
+        $mock->shouldReceive('getWebhooksSubscriptionApi->subscribeToStream')
+             ->withArgs([$userId, $token, $streamCallbackUri]);
+        $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
+
+        $streamController = new \App\Http\Controllers\StreamController($this->app->make(\App\Repository\TwitchRepository::class));
+        $request = $this->request->header->add('Authorization', 'Bearer '. $token);
+        $response = $streamController->registerWebHookSubscriptions($request, $userId);
+        $this->assertEquals(200, $response->getStatusCode());
+
     }
 }
