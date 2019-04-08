@@ -56,7 +56,6 @@ class TwitchRepository
      */
     final public function getAccessToken($authCode)
     {
-
         return $this->twitchApi->getOauthApi()->getUserAccessToken(
             $authCode,
             $this->redirectUri

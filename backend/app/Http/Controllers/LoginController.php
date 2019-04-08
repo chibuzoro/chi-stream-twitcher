@@ -26,6 +26,7 @@ class LoginController extends Controller
         try{
             return $this->twitchRepository->getAccessToken($authCode);
         }catch (GuzzleException $e){
+
             Log::alert('unable to retrieve access token');
             return response()->json([
                 'message' => 'supplied code maybe invalid'

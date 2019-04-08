@@ -35,16 +35,19 @@ class LoginIntegrationTest extends TestCase
      */
     public function testGetAccessToken(){
 
+        $code = 'xwsoponpmuadw6aclommctso6t36ei';
+
         $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
 
-        $code = 'xwsoponpmuadw6aclommctso6t36ei';
-        $expectedTokenApiResponse = "{
-  \"access_token\": \"0123456789abcdefghijABCDEFGHIJ\",
-  \"refresh_token\": \"eyJfaWQmNzMtNGCJ9%6VFV5LNrZFUj8oU231/3Aj\",
-  \"expires_in\": 3600,
-  \"scope\": [\"viewing_activity_read\"],
-  \"token_type\": \"bearer\"
-}";
+
+        $expectedTokenApiResponse = json_encode([
+            'access_token' => '0123456789abcdefghijABCDEFGHIJ',
+            'refresh_token' => '6VFV5LNrZFUj8oU231',
+            'expires_in' => 3600,
+            'scope' => ['viewing_activity_read'],
+            'token_type' => ['bearer'],
+
+        ]);
 
         $tokenResponse = new \GuzzleHttp\Psr7\Response(200, [], $expectedTokenApiResponse);
 
