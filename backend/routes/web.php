@@ -16,5 +16,6 @@ $router->group([ 'prefix' =>'api'], function($router){
     $router->get('/auth/token', 'LoginController'.'@getAccessToken');
     $router->get('/auth/response', 'LoginController'.'@respondToClient');
     $router->get('/stream/{channel}', 'StreamController'.'@captureStream');
+    $router->post('/stream/subscribe/{channel}', 'StreamController'.'@registerWebHookSubscriptions');
 });
 

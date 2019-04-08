@@ -44,9 +44,12 @@ class TwitchServiceProvider extends ServiceProvider
         // register the twitch repository
         $this->app->singleton(TwitchRepository::class, function($app){
             $redirectUri =  $this->buildUrlString(env('TWITCH_API_REGISTERED_REDIRECT_URL'));
+            $callBackStreamUri = $this->buildUrlString('api/pubsub');
             return new TwitchRepository(
                 $app->make( NewTwitchApi::class),
-                $redirectUri
+                $redirectUri,
+                $callBackStreamUri
+
             );
 
         });

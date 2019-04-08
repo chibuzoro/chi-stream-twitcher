@@ -32,6 +32,9 @@ class StreamController extends Controller
 
     final public function registerWebHookSubscriptions(Request $request, $userId){
 
+        $token = $this->extractTokenFromHeader($request);
+        $this->twitchRepository->registerWebhook($userId, $token);
+
         return response()->json('OK');
 
     }

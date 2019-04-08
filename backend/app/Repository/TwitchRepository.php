@@ -22,15 +22,20 @@ class TwitchRepository
     protected $redirectUri;
 
 
+    /**@var string * */
+    protected $callBackStreamUri;
+
+
     private const  SCOPES = 'user:edit+viewing_activity_read+openid+channel:read:subscriptions+bits:read+channel_subscriptions+channel_read';
 
 
 
 
-    public function __construct(NewTwitchApi $twitchApi, string $redirectUri)
+    public function __construct(NewTwitchApi $twitchApi, string $redirectUri, string $callBackStreamUri)
     {
         $this->twitchApi = $twitchApi;
         $this->redirectUri = $redirectUri;
+        $this->callBackStreamUri = $callBackStreamUri;
 
     }
 

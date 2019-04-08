@@ -88,10 +88,11 @@ class StreamTest extends TestCase
              ->withArgs([$userId, $token, $streamCallbackUri]);
         $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
 
-        $streamController = new \App\Http\Controllers\StreamController($this->app->make(\App\Repository\TwitchRepository::class));
-        $this->app->request->headers->add(['Authorization' =>  'Bearer '. $token]);
-        $response = $streamController->registerWebHookSubscriptions($this->app->request, $userId);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->call('POST', 'api/stream/subscribe/'. $userId, [], [], [], [
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
+
+        $this->assertResponseOk();
 
     }
 }
