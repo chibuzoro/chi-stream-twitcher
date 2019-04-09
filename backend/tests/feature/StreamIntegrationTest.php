@@ -8,6 +8,7 @@
 
 class StreamIntegrationTest extends TestCase
 {
+    use TestTrait;
 
     public function testCaptureStream(){
         $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
@@ -42,13 +43,21 @@ class StreamIntegrationTest extends TestCase
             $sampleStreamResponse);
 
         $username = 'LIRIK';
+        $token = 'xxxxyxxx';
 
         $mock->shouldReceive('getStreamsApi->getStreamForUsername')
              ->withArgs([$username])
              ->andReturn($tokenResponse);
+
+        $mock->shouldReceive('getOauthApi->isValidAccessToken')
+             ->withArgs([$token])
+             ->andReturnTrue(); // we want the Authorization middleware to pass
+
         $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
 
-        $this->get('/api/stream/' . $username);
+        $this->get('/api/stream/' . $username,[
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
         $expectedResult[] = [
             'message'   => sprintf('%s viewers', 32575),
             'thumbnail' => strtr('https://static-cdn.jtvnw.net/previews-ttv/live_user_lirik-{width}x{height}.jpg', ['{width}' => 40, '{height}' => 40]),
@@ -79,6 +88,11 @@ class StreamIntegrationTest extends TestCase
 
         $mock->shouldReceive('getWebhooksSubscriptionApi->subscribeToStream')
              ->withArgs([$userId, $token, $streamCallbackUri]);
+
+        $mock->shouldReceive('getOauthApi->isValidAccessToken')
+             ->withArgs([$token])
+             ->andReturnTrue(); // we want the Authorization middleware to pass
+
         $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
 
         $this->call('POST', 'api/stream/subscribe/'. $userId, [], [], [], [
@@ -86,6 +100,27 @@ class StreamIntegrationTest extends TestCase
         ]);
 
         $this->assertResponseOk();
+
+        $this->tearDown();
+
+    }
+
+    public function testValidateTokenTwitchAuthorizationMiddlewareFailure(){
+        $mock = Mockery::spy(\NewTwitchApi\NewTwitchApi::class);
+        $token = 'xxxyxxxyx';
+        $userId = 23161357;
+
+        $mock->shouldReceive('getOauthApi->isValidAccessToken')
+             ->withArgs([$token])
+             ->andReturnFalse(); // we force method to fail validation
+
+        $this->app->instance(\NewTwitchApi\NewTwitchApi::class, $mock);
+
+        $this->call('POST', 'api/stream/subscribe/'. $userId, [], [], [], [
+            "HTTP_Authorization" => 'Bearer '. $token
+        ]);
+
+        $this->assertResponseStatus(401);
 
         $this->tearDown();
 

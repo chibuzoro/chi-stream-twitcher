@@ -7,10 +7,12 @@
  */
 namespace App\Repository;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use NewTwitchApi\NewTwitchApi;
 use Pusher\Pusher;
+use Pusher\PusherException;
 
 class TwitchRepository
 {
@@ -198,5 +200,23 @@ class TwitchRepository
     }
 
 
+    /**
+     * @param string $token
+     *
+     * @return bool
+     */
+    final public function isValidToken(string $token): bool
+    {
+        $valid = false;
+        try {
+            $valid = $this->twitchApi->getOauthApi()->isValidAccessToken($token);
+//            dd($valid);
+
+        } catch (GuzzleException $exception) {
+            Log::alert('Unable to verify access token: ' . $token . 'Service may be down');
+        }
+        return $valid;
+
+    }
 
 }

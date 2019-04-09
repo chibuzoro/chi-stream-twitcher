@@ -71,6 +71,10 @@ $app->middleware([
     \Barryvdh\Cors\HandleCors::class,
 ]);
 
+$app->routeMiddleware([
+    'auth' => App\Http\Middleware\TwitchAuthorizationMiddleware::class
+]);
+
 
 /*
 |--------------------------------------------------------------------------

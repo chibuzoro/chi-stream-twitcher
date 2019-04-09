@@ -109,12 +109,17 @@
 
             },
             subscribePusherUpdates(channel) {
-                this.pusher.logToConsole = true;
-                this.pusher.subscribe(channel.toLowerCase());
-                this.pusher.bind('stream_changed', (event) => {
-                    console.log(event);
-                    this.events.unshift(event);
-                });
+                let url = apiUrl + '/stream/subscribe/' + channel;
+
+                axios.post(url, []).then(()=>{
+                    this.pusher.logToConsole = true;
+                    this.pusher.subscribe(channel.toLowerCase());
+                    this.pusher.bind('stream_changed', (event) => {
+                        console.log(event);
+                        this.events.unshift(event);
+                    });
+                })
+
             },
             unsubscribePusherUpdates(channel) {
                 this.pusher.unsubscribe(channel);
