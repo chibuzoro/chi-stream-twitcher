@@ -6,6 +6,8 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css';
 import router from './router';
 import './config.js';
 
+global.axios = require('axios');
+
 Vue.config.productionTip = false;
 
 new Vue({

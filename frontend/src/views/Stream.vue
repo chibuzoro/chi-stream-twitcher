@@ -13,11 +13,11 @@
                 ></v-img>
                 <v-text-field
                         v-model="channel"
+                        loading="progress"
                         label="Your Favourite Streamer?"
                         solo
                         @keydown.enter="loadStream"
                 >
-                    <v-progress-circular :value="progress"></v-progress-circular>
                 </v-text-field>
             </v-flex>
 
@@ -65,44 +65,44 @@
         }),
 
         created() {
+
+            this.channel = localStorage.getItem('channel');
+
+            // set the accesstoken
+
+            let twitcherAccess = localStorage.getItem('twitcherAccess');
+
+            if (twitcherAccess && twitcherAccess.access_token){
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + twitcherAccess.access_token;
+            }
+
             this.pusher = new Pusher(pusher.key, {
                 cluster: pusher.cluster
             });
 
-            // let formerChannel = localStorage.getItem('channel');
+            if (this.channel !== ''){
+                this.loadStream();
+            }
 
 
         },
         methods: {
             loadStream: function () {
+                this.progress = 'primary';
                 let url = apiUrl + '/stream/' + this.channel;
                 let formerChannel = localStorage.getItem('channel');
-                //
-                //
-                // // avoid duplicate request to server
-                // if (formerChannel && this.channel !== formerChannel) {
-                //
-                //
-                //
-                // }
-
-
-                if (formerChannel){
-                    this.unsubscribePusherUpdates(formerChannel);
-                }
-
-                this.progress = 0;
+                this.unsubscribePusherUpdates(formerChannel); // remove old subscriptions
 
                 axios.get(url).then(({data}) => {
+                    this.progress = false;
                     this.stream = this.channel ? this.channel : formerChannel;
-                    this.progress = 100;
                     this.events = data;
                     localStorage.setItem('channel', this.channel);
                     this.subscribePusherUpdates(this.channel);
 
                 }).catch(({response}) => {
-                    this.progress = 100;
                     if (response && response.status === 401) {
+                        localStorage.clear();
                         this.$router.replace('/')
                     }
                 });
@@ -112,19 +112,17 @@
                 let url = apiUrl + '/stream/subscribe/' + channel;
 
                 axios.post(url, []).then(()=>{
-                    this.pusher.logToConsole = true;
                     this.pusher.subscribe(channel.toLowerCase());
                     this.pusher.bind('stream_changed', (event) => {
-                        console.log(event);
                         this.events.unshift(event);
                     });
                 })
 
             },
             unsubscribePusherUpdates(channel) {
-                this.pusher.unsubscribe(channel);
+                this.pusher.unsubscribe(channel.toLowerCase());
                 this.pusher.unbind_all(() => {
-                    console.log('removed from channel')
+                   // removed all unwanted subs
                 })
             }
         }
