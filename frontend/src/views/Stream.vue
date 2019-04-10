@@ -34,7 +34,7 @@
                 <v-layout justify-center>
                     <v-flex xs12>
                         <v-list>
-                            <v-list-tile v-for="event,idx in events" :key="idx">
+                            <v-list-tile v-for="(event,idx) in events" :key="idx">
                                 <v-list-tile-avatar><img :src="event.thumbnail"></v-list-tile-avatar>
                                 <v-list-tile-content>
                                     <v-list-tile-title v-text="event.title"></v-list-tile-title>

@@ -90,8 +90,8 @@
                 axios.get(url).then(({data}) => {
                     // redirect to twitcher api to authenticate and receive authcode
                     window.location.href = data.authUrl;
-                }).catch(({response}) => {
-                   // error from twitcher APi
+                }).catch(() => {
+                   // error from twitcher APi - for test app do nothing
                 });
             },
             loadStreamPage: function(){
@@ -107,8 +107,8 @@
                     // store token in axios session so its sent with every request
                     axios.defaults.headers.common['Authorization'] = 'Bearer ' + data.access_token;
 
-                }).catch(({response}) => {
-                    console.log(response);
+                }).catch(() => {
+                   // do nothing
                 });
             },
             convertObjToQueryParam: function (obj) {
