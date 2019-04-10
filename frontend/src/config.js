@@ -2,8 +2,7 @@
 require('dotenv').config();
 
 global.apiUrl = process.env.API_URL;
-
 global.pusher = {
-    key: process.env.PUSHER_KEY,
-    cluster: process.env.PUSHER_CLUSTER
+    key: process.env.VUE_APP_PUSHER_KEY,
+    cluster: process.env.VUE_APP_PUSHER_CLUSTER
 };
