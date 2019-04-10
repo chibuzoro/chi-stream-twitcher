@@ -74,7 +74,7 @@
 
             let twitcherAccess = localStorage.getItem('twitcherAccess');
 
-            if (twitcherAccess && twitcherAccess.access_token){
+            if (twitcherAccess && JSON.parse(twitcherAccess).access_token){
                 this.$router.push('stream')
             }
 

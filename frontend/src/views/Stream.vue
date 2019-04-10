@@ -79,8 +79,9 @@
 
             let twitcherAccess = localStorage.getItem('twitcherAccess');
 
-            if (twitcherAccess && twitcherAccess.access_token){
-                axios.defaults.headers.common['Authorization'] = 'Bearer ' + twitcherAccess.access_token;
+            if (twitcherAccess ){
+                let accessToken = JSON.parse(twitcherAccess).access_token
+                axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
             }
 
             this.pusher = new Pusher(pusher.key, {
