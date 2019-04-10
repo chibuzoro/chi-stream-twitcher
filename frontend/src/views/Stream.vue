@@ -13,8 +13,8 @@
                 ></v-img>
                 <v-text-field
                         v-model="channel"
-                        loading="progress"
-                        label="Your Favourite Streamer?"
+                        v-loading="progress"
+                        label="Type Your Favourite Streamer Here. Hit Enter to Subscribe"
                         solo
                         @keydown.enter="loadStream"
                 >
