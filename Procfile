@@ -1,1 +1,1 @@
-web: ./heroku/start
+web: bash ./heroku/start
