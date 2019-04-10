@@ -45,7 +45,7 @@
                         <v-list v-else>
                             <v-list-tile>
                                 <v-list-tile-content>
-                                    <v-list-tile-title text="No Events Found"></v-list-tile-title>
+                                    <v-list-tile-title v-text="'No Events Found'"></v-list-tile-title>
                                 </v-list-tile-content>
                             </v-list-tile>
                         </v-list>
