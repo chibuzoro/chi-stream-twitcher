@@ -33,12 +33,19 @@
 
                 <v-layout justify-center>
                     <v-flex xs12>
-                        <v-list>
+                        <v-list v-if="events && events.length >  0">
                             <v-list-tile v-for="(event,idx) in events" :key="idx">
                                 <v-list-tile-avatar><img :src="event.thumbnail"></v-list-tile-avatar>
                                 <v-list-tile-content>
                                     <v-list-tile-title v-text="event.title"></v-list-tile-title>
                                     <v-list-tile-sub-title v-text="event.message"></v-list-tile-sub-title>
+                                </v-list-tile-content>
+                            </v-list-tile>
+                        </v-list>
+                        <v-list v-else>
+                            <v-list-tile>
+                                <v-list-tile-content>
+                                    <v-list-tile-title text="No Events Found"></v-list-tile-title>
                                 </v-list-tile-content>
                             </v-list-tile>
                         </v-list>

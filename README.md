@@ -5,7 +5,7 @@
 
 
 This is a simple event based application for following the activities of a your favourite streamer.
-[Demo Here](https://chi-streamer-app.heroku.com) 
+[Demo Here](https://chistreamer.herokuapp.com) 
 
 **
 
