@@ -1,6 +1,0 @@
-#!/bin/bash
-set -xe
-
-# Start Heroku's PHP + nginx buildpack
-pushd backend
-exec ./vendor/bin/heroku-php-nginx -C ../nginx_app.conf ../frontend/dist/
